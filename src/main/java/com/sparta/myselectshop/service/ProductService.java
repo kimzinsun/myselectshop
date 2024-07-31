@@ -23,13 +23,13 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
-    private final ProductRepository productRespository;
+    private final ProductRepository productRepository;
     private final FolderRepository folderRepository;
     private final ProductFolderRepository productFolderRepository;
     public static final int MIN_MY_PRICE = 100;
 
     public ProductResponseDto createProduct(ProductRequestDto requestDto, User user) {
-        Product product = productRespository.save(new Product(requestDto, user));
+        Product product = productRepository.save(new Product(requestDto, user));
         return new ProductResponseDto(product);
     }
 
@@ -39,7 +39,7 @@ public class ProductService {
         if (myprice < MIN_MY_PRICE) {
             throw new IllegalArgumentException("유효하지 않은 관심 가격입니다. 최소 " + MIN_MY_PRICE + "원 이상으로 설정해 주세요.");
         }
-        Product product = productRespository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NullPointerException("해당 상품을 찾을 수 없습니다."));
 
         product.update(requestDto);
@@ -56,9 +56,9 @@ public class ProductService {
         UserRoleEnum userRoleEnum = user.getRole();
         Page<Product> productList;
         if(userRoleEnum == UserRoleEnum.ADMIN) {
-            productList = productRespository.findAll(pageable);
+            productList = productRepository.findAll(pageable);
         } else {
-            productList = productRespository.findAllByUser(user, pageable);
+            productList = productRepository.findAllByUser(user, pageable);
         }
 
         return productList.map(ProductResponseDto::new);
@@ -67,13 +67,13 @@ public class ProductService {
 
     @Transactional
     public void updateBySearch(Long id, ItemDto itemDto) {
-        Product product = productRespository.findById(id)
+        Product product = productRepository.findById(id)
                 .orElseThrow(() -> new NullPointerException("해당 상품은 존재하지 않습니다."));
         product.updateByItemDto(itemDto);
     }
 
     public List<ProductResponseDto> getAllProducts() {
-        List<Product> productList = productRespository.findAll();
+        List<Product> productList = productRepository.findAll();
         List<ProductResponseDto> productResponseDtoList = new ArrayList<>();
         for (Product product : productList) {
             productResponseDtoList.add(new ProductResponseDto(product));
@@ -82,7 +82,7 @@ public class ProductService {
     }
 
     public void addFolder(Long productId, Long folderId, User user) {
-        Product product = productRespository.findById(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NullPointerException("해당 상품을 찾을 수 없습니다."));
 
         Folder folder = folderRepository.findById(folderId)
@@ -106,7 +106,7 @@ public class ProductService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Product> products = productRespository.findAllByUserAndProductFolderList_FolderId(user, folderId, pageable);
+        Page<Product> products = productRepository.findAllByUserAndProductFolderList_FolderId(user, folderId, pageable);
         Page<ProductResponseDto> responseDtoList = products.map(ProductResponseDto::new);
 
         return responseDtoList;
