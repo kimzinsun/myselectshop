@@ -55,7 +55,7 @@ public class ProductService {
 
         UserRoleEnum userRoleEnum = user.getRole();
         Page<Product> productList;
-        if(userRoleEnum == UserRoleEnum.ADMIN) {
+        if (userRoleEnum == UserRoleEnum.ADMIN) {
             productList = productRepository.findAll(pageable);
         } else {
             productList = productRepository.findAllByUser(user, pageable);
@@ -88,12 +88,12 @@ public class ProductService {
         Folder folder = folderRepository.findById(folderId)
                 .orElseThrow(() -> new NullPointerException("해당 폴더를 찾을 수 없습니다."));
 
-        if(!product.getUser().getId().equals(user.getId()) || !folder.getUser().getId().equals(user.getId())) {
+        if (!product.getUser().getId().equals(user.getId()) || !folder.getUser().getId().equals(user.getId())) {
             throw new IllegalArgumentException("회원님의 관심 상품이 아니거나, 회원님의 폴더가 아닙니다.");
         }
 
         Optional<ProductFolder> overlapFolder = productFolderRepository.findByProductAndFolder(product, folder);
-        if(overlapFolder.isPresent()) {
+        if (overlapFolder.isPresent()) {
             throw new IllegalArgumentException("이미 추가된 폴더입니다.");
         }
 
